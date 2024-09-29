@@ -1,0 +1,9 @@
+[package]
+name = "ater"
+description = "Another text editor in rust"
+version = "0.0.1"
+edition = "2021"
+authors = ["Ismael Aderdor Domingo <info@iaderdor.info>"]
+
+[dependencies]
+crossterm = "0.28.1"
