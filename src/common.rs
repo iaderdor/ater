@@ -13,6 +13,8 @@ pub enum Action {
   Quit,
 
   ChangeMode(Mode),
+
+  InsertCharacter(char),
 }
 
 pub struct Cursor {

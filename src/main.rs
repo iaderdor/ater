@@ -3,9 +3,10 @@ use std::io::Write;
 use application_state::ApplicationState;
 use common::{AResult, Action, Mode};
 use crossterm::{
-  event::{self, KeyCode},
+  event::{self, KeyCode, KeyModifiers},
+  style,
   terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
-  ExecutableCommand,
+  ExecutableCommand, QueueableCommand,
 };
 
 mod application_state;
@@ -16,7 +17,7 @@ fn handle_event(application_state: &mut ApplicationState, event: &event::Event) 
 
   match mode {
     common::Mode::Normal => handle_normal_mode_event(application_state, event),
-    common::Mode::Insert => todo!(),
+    common::Mode::Insert => handle_insert_mode_event(event),
   }
 }
 
@@ -28,15 +29,12 @@ fn handle_normal_mode_event(
     event::Event::Key(event) => match event {
       event::KeyEvent {
         code: KeyCode::Char('q'),
-        modifiers,
-        kind,
-        state,
+        modifiers: KeyModifiers::CONTROL,
+        ..
       } => Some(Action::Quit),
       event::KeyEvent {
         code: KeyCode::Char('i'),
-        modifiers,
-        kind,
-        state,
+        ..
       } => Some(Action::ChangeMode(Mode::Insert)),
       _ => None,
     },
@@ -44,10 +42,34 @@ fn handle_normal_mode_event(
   }
 }
 
-fn handle_action(application_state: &mut ApplicationState, action: Action) {
-  if let Action::ChangeMode(mode) = action {
-    change_mode(application_state, mode)
+fn handle_insert_mode_event(event: &event::Event) -> Option<Action> {
+  match event {
+    event::Event::Key(event) => match event {
+      event::KeyEvent {
+        code: KeyCode::Char(c),
+        ..
+      } => Some(Action::InsertCharacter(*c)),
+      event::KeyEvent {
+        code: KeyCode::Esc, ..
+      } => Some(Action::ChangeMode(Mode::Normal)),
+      _ => None,
+    },
+    _ => None,
   }
+}
+
+fn handle_action(application_state: &mut ApplicationState, action: Action) {
+  match action {
+    Action::ChangeMode(mode) => change_mode(application_state, mode),
+    Action::InsertCharacter(c) => insert_character(application_state, c),
+    _ => (),
+  }
+}
+
+fn insert_character(application_state: &mut ApplicationState, c: char) {
+  application_state.stdout.queue(style::Print(c));
+
+  application_state.cursor.x += 1;
 }
 
 fn change_mode(application_state: &mut ApplicationState, mode: Mode) {
