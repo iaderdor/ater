@@ -14,6 +14,11 @@ pub enum Action {
 
   ChangeMode(Mode),
 
+  MoveRight,
+  MoveLeft,
+  MoveUp,
+  MoveDown,
+
   InsertCharacter(char),
 }
 

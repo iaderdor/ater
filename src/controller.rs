@@ -52,15 +52,31 @@ impl Controller {
   fn handle_normal_mode_event(&self, event: &event::Event) -> Option<Action> {
     match event {
       event::Event::Key(event) => match event {
-        event::KeyEvent {
+        KeyEvent {
           code: KeyCode::Char('q'),
           modifiers: KeyModifiers::CONTROL,
           ..
         } => Some(Action::Quit),
-        event::KeyEvent {
+        KeyEvent {
           code: KeyCode::Char('i'),
           ..
         } => Some(Action::ChangeMode(Mode::Insert)),
+        KeyEvent {
+          code: KeyCode::Char('j'),
+          ..
+        } => Some(Action::MoveLeft),
+        KeyEvent {
+          code: KeyCode::Char('k'),
+          ..
+        } => Some(Action::MoveDown),
+        KeyEvent {
+          code: KeyCode::Char('l'),
+          ..
+        } => Some(Action::MoveUp),
+        KeyEvent {
+          code: KeyCode::Char('ñ'),
+          ..
+        } => Some(Action::MoveRight),
         _ => None,
       },
       _ => None,
@@ -87,6 +103,10 @@ impl Controller {
     match action {
       Action::ChangeMode(mode) => self.change_mode(mode),
       Action::InsertCharacter(c) => self.insert_character(c),
+      Action::MoveRight => self.move_right(),
+      Action::MoveLeft => self.move_left(),
+      Action::MoveUp => self.move_up(),
+      Action::MoveDown => self.move_down(),
       _ => (),
     }
   }
@@ -99,5 +119,21 @@ impl Controller {
 
   fn change_mode(&mut self, mode: Mode) {
     self.application_state.mode = mode;
+  }
+
+  fn move_right(&mut self) {
+    self.application_state.cursor.x += 1;
+  }
+
+  fn move_left(&mut self) {
+    self.application_state.cursor.x = self.application_state.cursor.x.saturating_sub(1);
+  }
+
+  fn move_up(&mut self) {
+    self.application_state.cursor.y = self.application_state.cursor.y.saturating_sub(1);
+  }
+
+  fn move_down(&mut self) {
+    self.application_state.cursor.y += 1;
   }
 }
