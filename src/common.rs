@@ -1,4 +1,4 @@
-use std::io::Stdout;
+use std::io::stdout;
 
 use crossterm::{cursor, QueueableCommand};
 
@@ -27,7 +27,7 @@ impl Cursor {
     Self { x: 0, y: 0 }
   }
 
-  pub fn move_to(&self, stdout: &mut Stdout) {
-    stdout.queue(cursor::MoveTo(self.x, self.y));
+  pub fn update(&self) {
+    stdout().queue(cursor::MoveTo(self.x, self.y));
   }
 }
